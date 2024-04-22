@@ -8,17 +8,23 @@ rule xpore_eventalign:
     input:
         fastq=rules.merge_fastq.output.fastq,
         index=rules.f5c_index.output.indices,
-        bam=rules.alignmemt_postfilter.output.bam,
-        fasta=rules.index_transcriptome.output.fasta,
+        bam=rules.minimap2_align.output.bam,
+        fasta="/projects/ly_vu_direct_rna/MetaCompore/results/input/get_transcriptome/nanocompore_reference_transcriptome.fa",
+        # bam=rules.alignmemt_postfilter.output.bam,
+        # fasta=rules.index_transcriptome.output.fasta,
         kmer_model="resources/f5c/r9.4_70bps.u_to_t_rna.5mer.template.model",
     output:
-        tsv=xpore_dir / "eventalign/{sample}_data.tsv",
-        summary=xpore_dir / "eventalign/{sample}_summary.tsv",
+        tsv=xpore_dir / "eventalign2/{sample}_data.tsv",
+        summary=xpore_dir / "eventalign2/{sample}_summary.tsv",
+        # tsv=xpore_dir / "eventalign/{sample}_data.tsv",
+        # summary=xpore_dir / "eventalign/{sample}_summary.tsv",
     log:
-        logs_dir / "xpore_eventalign/{sample}.log",
-    threads: 8
+        logs_dir / "xpore_eventalign2/{sample}.log",
+        # logs_dir / "xpore_eventalign/{sample}.log",
+    threads: 100
     params:
-        opt="-x desktop-high --rna --signal-index --scale-events --verbose 2",
+        opt="-x hpc-high --rna --signal-index --scale-events --verbose 2",
+            # "-x desktop-high --rna --signal-index --scale-events --verbose 2",
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 8 * GB,
         partition="gpgpu",
@@ -33,8 +39,8 @@ rule xpore_eventalign:
         """
 
 
-dataprep_dir = xpore_dir / "dataprep"
-
+# dataprep_dir = xpore_dir / "dataprep"
+dataprep_dir = xpore_dir / "dataprep2"
 
 rule xpore_dataprep:
     input:
@@ -49,8 +55,9 @@ rule xpore_dataprep:
         ),
         idx=dataprep_dir / "{sample}/eventalign.index",
     log:
-        logs_dir / "xpore_dataprep/{sample}.log",
-    threads: 8
+        # logs_dir / "xpore_dataprep/{sample}.log",
+        logs_dir / "xpore_dataprep2/{sample}.log",
+    threads: 100
     params:
         opt="--readcount_max 1000000",
         outdir=lambda wildcards, output: Path(output.idx).parent,
@@ -66,7 +73,8 @@ rule xpore_dataprep:
         """
 
 
-diffmod_dir = xpore_dir / "diffmod"
+# diffmod_dir = xpore_dir / "diffmod"
+diffmod_dir = xpore_dir / "diffmod2"
 
 
 rule xpore_config:
@@ -84,11 +92,14 @@ rule xpore_config:
     resources:
         time="5m",
     log:
-        logs_dir / "xpore_config/{sample}.log",
+        # logs_dir / "xpore_config/{sample}.log",
+        logs_dir / "xpore_config2/{sample}.log",
     conda:
-        str(envs_dir / "xpore_config.yaml")
+        # str(envs_dir / "xpore_config.yaml")
+        "/projects/ly_vu_direct_rna/Sepsis-methylation/workflow/envs/xpore_config.yaml"
     script:
-        str(scripts_dir / "xpore_config.py")
+        # str(scripts_dir / "xpore_config.py")
+        "/projects/ly_vu_direct_rna/Sepsis-methylation/workflow/scripts/xpore_config.py"
 
 
 rule xpore_diffmod:
@@ -100,8 +111,9 @@ rule xpore_diffmod:
     wildcard_constraints:
         sample="|".join(TESTS),  # dont use control sample in {sample} wildcard
     log:
-        logs_dir / "xpore_diffmod/{sample}.log",
-    threads: 8
+        # logs_dir / "xpore_diffmod/{sample}.log",
+        logs_dir / "xpore_diffmod2/{sample}.log",
+    threads: 100
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 8 * GB,
         time="1h",
